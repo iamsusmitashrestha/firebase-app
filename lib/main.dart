@@ -1,11 +1,13 @@
 import 'package:firebase_app/features/login/login_screen.dart';
-import 'package:firebase_app/features/profile/profile_screen.dart';
 import 'package:firebase_app/features/signup/signup_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'features/splash/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -26,7 +28,6 @@ class MyApp extends StatelessWidget {
         "/": (context) => const SplashScreen(),
         "/login": (context) => const LoginScreen(),
         "/signup": (context) => const SignupScreen(),
-        "/profile": (context) => const ProfileScreen(),
       },
     );
   }
