@@ -134,11 +134,6 @@ class LoginScreen extends StatelessWidget {
                                               ),
                                             )
                                           }
-                                        else
-                                          {
-                                            Navigator.pushReplacementNamed(
-                                                context, "/profile")
-                                          }
                                       });
                                 })
                           ],

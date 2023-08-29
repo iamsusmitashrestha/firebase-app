@@ -28,8 +28,6 @@ class AuthProvider with ChangeNotifier {
   Future<void> login() async {
     try {
       _setLoading(true);
-      // _error = null;
-
       notifyListeners();
 
       await FirebaseAuth.instance
@@ -51,10 +49,6 @@ class AuthProvider with ChangeNotifier {
       _setLoading(false);
       _setError("Something went wrong. Please try again.");
     }
-  }
-
-  void signout() async {
-    await FirebaseAuth.instance.signOut();
   }
 
   void _setError(String errorMessage) {
