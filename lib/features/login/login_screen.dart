@@ -15,8 +15,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider =
-        Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       body: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
@@ -76,58 +74,77 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     elHeightSpan,
-                    Container(
-                      padding: lPadding,
-                      child: Column(
-                        children: [
-                          KTextFormField(
-                            label: "Email",
-                            validator: (value) {
-                              RegExp regex =
-                                  RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-                              if (!regex.hasMatch(value!))
-                                return "Invalid email";
-                              return null;
-                            },
-                            onChanged: authProvider.onEmailChanged,
-                          ),
-                          mHeightSpan,
-                          KTextFormField(
-                            label: "Password",
-                            obscureText: true,
-                            validator: (value) {
-                              RegExp regex = RegExp(
-                                  r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-                              if (value!.isEmpty) {
-                                return 'Please enter password';
-                              } else {
-                                if (!regex.hasMatch(value)) {
-                                  return 'Enter valid password';
-                                } else {
-                                  return null;
+                    Consumer<AuthProvider>(
+                      builder: (context, value, child) => Container(
+                        padding: lPadding,
+                        child: Column(
+                          children: [
+                            KTextFormField(
+                              label: "Email",
+                              validator: (value) {
+                                RegExp regex =
+                                    RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                                if (!regex.hasMatch(value!)) {
+                                  return "Invalid email";
                                 }
-                              }
-                            },
-                            onChanged: authProvider.onPasswordChanged,
-                          ),
-                          elHeightSpan,
-                          KButton(
-                            child: const Text(
-                              "Sign in",
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
+                                return null;
+                              },
+                              onChanged: value.onEmailChanged,
                             ),
-                            onPressed: () async {
-                              await authProvider.login();
-                              Navigator.pushReplacementNamed(
-                                  context, "/profile");
-                            },
-                          )
-                        ],
+                            mHeightSpan,
+                            KTextFormField(
+                              label: "Password",
+                              obscureText: true,
+                              validator: (value) {
+                                RegExp regex = RegExp(
+                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+                                if (value!.isEmpty) {
+                                  return 'Please enter password';
+                                } else {
+                                  if (!regex.hasMatch(value)) {
+                                    return 'Enter valid password';
+                                  } else {
+                                    return null;
+                                  }
+                                }
+                              },
+                              onChanged: value.onPasswordChanged,
+                            ),
+                            elHeightSpan,
+                            KButton(
+                                child: const Text(
+                                  "Sign in",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  value.login().then((v) => {
+                                        if (value.error != null)
+                                          {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                backgroundColor: PRIMARY_COLOR,
+                                                content: Text(
+                                                  value.error!,
+                                                  style: const TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            )
+                                          }
+                                        else
+                                          {
+                                            Navigator.pushReplacementNamed(
+                                                context, "/profile")
+                                          }
+                                      });
+                                })
+                          ],
+                        ),
                       ),
-                    ),
-                    lHeightSpan,
+                    )
                   ],
                 ),
               );

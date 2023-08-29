@@ -27,22 +27,18 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> login() async {
     try {
-      print("after try");
-
       _setLoading(true);
+      // _error = null;
 
-      _error = null;
       notifyListeners();
 
-      print(email);
-      print(password);
-      UserCredential asd = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email!, password: password!);
-      print(asd);
 
       Navigator.pushReplacementNamed(context, "/profile");
+
+      resetError();
     } on FirebaseAuthException catch (e) {
-      print(e);
       _setLoading(false);
       if (e.code == 'user-not-found') {
         _setError("User Not Found");
@@ -52,28 +48,27 @@ class AuthProvider with ChangeNotifier {
         _setError("Something went wrong. Please try again.");
       }
     } catch (e) {
-      print(e);
       _setLoading(false);
       _setError("Something went wrong. Please try again.");
     }
   }
 
+  void signout() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
   void _setError(String errorMessage) {
     _error = errorMessage;
     notifyListeners();
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     backgroundColor: PRIMARY_COLOR,
-    //     content: Text(
-    //       errorMessage,
-    //       style: const TextStyle(color: Colors.white),
-    //     ),
-    //   ),
-    // );
   }
 
   void _setLoading(bool value) {
     _loading = value;
+    notifyListeners();
+  }
+
+  void resetError() {
+    _error = null;
     notifyListeners();
   }
 }
