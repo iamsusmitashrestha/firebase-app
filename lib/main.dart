@@ -1,4 +1,5 @@
 import 'package:firebase_app/features/login/login_screen.dart';
+import 'package:firebase_app/features/profile/profile_provider.dart';
 import 'package:firebase_app/features/profile/profile_screen.dart';
 import 'package:firebase_app/features/signup/signup_provider.dart';
 import 'package:firebase_app/features/signup/signup_screen.dart';
@@ -35,7 +36,10 @@ class MyApp extends StatelessWidget {
               create: (context) => SignupProvider(context),
               child: SignupScreen(),
             ),
-        "/profile": (context) => const ProfileScreen(),
+        "/profile": (context) => ChangeNotifierProvider(
+              create: (context) => ProfileProvider(),
+              child: ProfileScreen(),
+            ),
       },
     );
   }
