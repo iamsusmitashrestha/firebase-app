@@ -1,8 +1,11 @@
 import 'package:firebase_app/features/login/login_screen.dart';
 import 'package:firebase_app/features/profile/profile_screen.dart';
+import 'package:firebase_app/features/signup/signup_provider.dart';
 import 'package:firebase_app/features/signup/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'features/login/auth_provider.dart';
 import 'features/splash/splash_screen.dart';
 
 void main() {
@@ -24,8 +27,14 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/": (context) => const SplashScreen(),
-        "/login": (context) => const LoginScreen(),
-        "/signup": (context) => const SignupScreen(),
+        "/login": (context) => ChangeNotifierProvider(
+              create: (context) => AuthProvider(context),
+              child: LoginScreen(),
+            ),
+        "/signup": (context) => ChangeNotifierProvider(
+              create: (context) => SignupProvider(context),
+              child: SignupScreen(),
+            ),
         "/profile": (context) => const ProfileScreen(),
       },
     );
