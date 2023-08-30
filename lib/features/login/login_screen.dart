@@ -77,41 +77,43 @@ class LoginScreen extends StatelessWidget {
                     Consumer<AuthProvider>(
                       builder: (context, value, child) => Container(
                         padding: lPadding,
-                        child: Column(
-                          children: [
-                            KTextFormField(
-                              label: "Email",
-                              validator: (value) {
-                                RegExp regex =
-                                    RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-                                if (!regex.hasMatch(value!)) {
-                                  return "Invalid email";
-                                }
-                                return null;
-                              },
-                              onChanged: value.onEmailChanged,
-                            ),
-                            mHeightSpan,
-                            KTextFormField(
-                              label: "Password",
-                              obscureText: true,
-                              validator: (value) {
-                                RegExp regex = RegExp(
-                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-                                if (value!.isEmpty) {
-                                  return 'Please enter password';
-                                } else {
-                                  if (!regex.hasMatch(value)) {
-                                    return 'Enter valid password';
-                                  } else {
-                                    return null;
+                        child: Form(
+                          key: value.formKey,
+                          child: Column(
+                            children: [
+                              KTextFormField(
+                                label: "Email",
+                                validator: (value) {
+                                  RegExp regex = RegExp(
+                                      r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                                  if (!regex.hasMatch(value!)) {
+                                    return "Invalid email";
                                   }
-                                }
-                              },
-                              onChanged: value.onPasswordChanged,
-                            ),
-                            elHeightSpan,
-                            KButton(
+                                  return null;
+                                },
+                                onChanged: value.onEmailChanged,
+                              ),
+                              mHeightSpan,
+                              KTextFormField(
+                                label: "Password",
+                                obscureText: true,
+                                validator: (value) {
+                                  RegExp regex = RegExp(
+                                      r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+                                  if (value!.isEmpty) {
+                                    return 'Please enter password';
+                                  } else {
+                                    if (!regex.hasMatch(value)) {
+                                      return 'Enter valid password';
+                                    } else {
+                                      return null;
+                                    }
+                                  }
+                                },
+                                onChanged: value.onPasswordChanged,
+                              ),
+                              elHeightSpan,
+                              KButton(
                                 child: const Text(
                                   "Sign in",
                                   style: TextStyle(
@@ -119,24 +121,31 @@ class LoginScreen extends StatelessWidget {
                                   ),
                                 ),
                                 onPressed: () {
-                                  value.login().then((v) => {
-                                        if (value.error != null)
-                                          {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                backgroundColor: PRIMARY_COLOR,
-                                                content: Text(
-                                                  value.error!,
-                                                  style: const TextStyle(
-                                                      color: Colors.white),
-                                                ),
-                                              ),
-                                            )
-                                          }
-                                      });
-                                })
-                          ],
+                                  if (value.formKey.currentState!.validate()) {
+                                    value.login().then(
+                                          (v) => {
+                                            if (value.error != null)
+                                              {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    backgroundColor:
+                                                        PRIMARY_COLOR,
+                                                    content: Text(
+                                                      value.error!,
+                                                      style: const TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ),
+                                                )
+                                              }
+                                          },
+                                        );
+                                  }
+                                },
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     )

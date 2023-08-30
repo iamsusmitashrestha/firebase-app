@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class AuthProvider with ChangeNotifier {
   final BuildContext context;
+  final formKey = GlobalKey<FormState>();
 
   AuthProvider(this.context);
   String? _error;
