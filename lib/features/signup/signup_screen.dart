@@ -1,8 +1,11 @@
+import 'package:firebase_app/features/signup/signup_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../common/widgets/k_button.dart';
 import '../../common/constants/ui_helpers.dart';
 import '../../common/widgets/k_text_form_field.dart';
+import '../../themes/app_themes.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -59,71 +62,99 @@ class SignupScreen extends StatelessWidget {
             ),
           ),
           elHeightSpan,
-          Container(
-            padding: lPadding,
-            child: Column(
-              children: [
-                KTextFormField(
-                  label: "Full Name",
-                  validator: (name) {
-                    RegExp regex = RegExp(r"^[A-Z][a-z]*\s[A-Z][a-z]*$");
+          Consumer<SignupProvider>(
+            builder: (context, value, child) => Container(
+              padding: lPadding,
+              child: Form(
+                key: value.formKey,
+                child: Column(
+                  children: [
+                    KTextFormField(
+                      label: "Full Name",
+                      onChanged: value.onFullNameChanged,
+                      validator: (name) {
+                        RegExp regex = RegExp(r"^[A-Z][a-z]*\s[A-Z][a-z]*$");
 
-                    if (name == null || name.isEmpty) {
-                      return "Please enter full name";
-                    }
-                    if (!regex.hasMatch(name)) return "Invalid full name";
-                  },
-                ),
-                mHeightSpan,
-                KTextFormField(
-                  label: "Email",
-                  validator: (email) {
-                    RegExp regex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-                    if (email == null || email.isEmpty) {
-                      return "Please enter email";
-                    }
-                    if (!regex.hasMatch(email)) return "Invalid email";
-                  },
-                ),
-                mHeightSpan,
-                KTextFormField(
-                  label: "Password",
-                  obscureText: true,
-                  validator: (password) {
-                    if (password == null || password.isEmpty) {
-                      return "Please enter password";
-                    }
-
-                    if (password.length < 8) {
-                      return "Password must have 8 characters";
-                    }
-                    if (!password.contains(RegExp(r'[A-Z]'))) {
-                      return "Password must have uppercase";
-                    }
-                    if (!password.contains(RegExp(r'[0-9]'))) {
-                      return "Password must have digits";
-                    }
-                    if (!password.contains(RegExp(r'[a-z]'))) {
-                      return "Password must have lowercase";
-                    }
-                    if (!password.contains(RegExp(r'[#?!@$%^&*-]'))) {
-                      return "Password must have special characters";
-                    }
-                  },
-                ),
-                elHeightSpan,
-                KButton(
-                  child: const Text(
-                    "Sign up",
-                    style: TextStyle(
-                      fontSize: 16,
+                        if (name == null || name.isEmpty) {
+                          return "Please enter full name";
+                        }
+                        if (!regex.hasMatch(name)) return "Invalid full name";
+                      },
                     ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, "/login");
-                  },
-                )
-              ],
+                    mHeightSpan,
+                    KTextFormField(
+                      label: "Email",
+                      onChanged: value.onEmailChanged,
+                      validator: (email) {
+                        RegExp regex =
+                            RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                        if (email == null || email.isEmpty) {
+                          return "Please enter email";
+                        }
+                        if (!regex.hasMatch(email)) return "Invalid email";
+                      },
+                    ),
+                    mHeightSpan,
+                    KTextFormField(
+                      label: "Password",
+                      obscureText: true,
+                      onChanged: value.onPasswordChanged,
+                      validator: (password) {
+                        if (password == null || password.isEmpty) {
+                          return "Please enter password";
+                        }
+
+                        if (password.length < 8) {
+                          return "Password must have 8 characters";
+                        }
+                        if (!password.contains(RegExp(r'[A-Z]'))) {
+                          return "Password must have uppercase";
+                        }
+                        if (!password.contains(RegExp(r'[0-9]'))) {
+                          return "Password must have digits";
+                        }
+                        if (!password.contains(RegExp(r'[a-z]'))) {
+                          return "Password must have lowercase";
+                        }
+                        if (!password.contains(RegExp(r'[#?!@$%^&*-]'))) {
+                          return "Password must have special characters";
+                        }
+                      },
+                    ),
+                    elHeightSpan,
+                    KButton(
+                      child: const Text(
+                        "Sign up",
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      onPressed: () {
+                        if (value.formKey.currentState!.validate()) {
+                          value.signup().then(
+                                (v) => {
+                                  if (value.error != null)
+                                    {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: PRIMARY_COLOR,
+                                          content: Text(
+                                            value.error!,
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                      )
+                                    }
+                                },
+                              );
+                        }
+                      },
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
           lHeightSpan,

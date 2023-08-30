@@ -1,11 +1,13 @@
 import 'package:firebase_app/features/login/auth_provider.dart';
 import 'package:firebase_app/features/login/login_screen.dart';
 import 'package:firebase_app/features/profile/profile_screen.dart';
+import 'package:firebase_app/features/signup/signup_provider.dart';
 import 'package:firebase_app/features/signup/signup_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'features/login/auth_provider.dart';
 import 'features/splash/splash_screen.dart';
 
 void main() async {
@@ -33,7 +35,14 @@ class MyApp extends StatelessWidget {
               create: (context) => AuthProvider(context),
               child: LoginScreen(),
             ),
+<<<<<<< HEAD
         "/signup": (context) => const SignupScreen(),
+=======
+        "/signup": (context) => ChangeNotifierProvider(
+              create: (context) => SignupProvider(context),
+              child: SignupScreen(),
+            ),
+>>>>>>> 15ce38f (create user done)
         "/profile": (context) => const ProfileScreen(),
       },
     );

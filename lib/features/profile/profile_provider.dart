@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileProvider with ChangeNotifier {
-  void logout() {}
+  fetchUserData() async {
+    try {} catch (e) {}
+  }
 }

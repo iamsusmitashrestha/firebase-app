@@ -1,4 +1,5 @@
 import 'package:firebase_app/common/widgets/k_button.dart';
+import 'package:firebase_app/common/widgets/k_text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -13,13 +14,13 @@ class ProfileScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Text(
-              user.email!,
+            KTextFormField(
+              initialValue: user.email,
             ),
             SizedBox(
               width: 200,
               child: KButton(
-                  child: Text("Logout"),
+                  child: const Text("Logout"),
                   onPressed: () => {
                         _firebaseAuth.signOut(),
                         Navigator.of(context).pushReplacementNamed("/login"),
