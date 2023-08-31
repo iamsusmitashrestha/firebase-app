@@ -35,14 +35,10 @@ class MyApp extends StatelessWidget {
               create: (context) => AuthProvider(context),
               child: LoginScreen(),
             ),
-<<<<<<< HEAD
-        "/signup": (context) => const SignupScreen(),
-=======
         "/signup": (context) => ChangeNotifierProvider(
               create: (context) => SignupProvider(context),
               child: SignupScreen(),
             ),
->>>>>>> 15ce38f (create user done)
         "/profile": (context) => const ProfileScreen(),
       },
     );
