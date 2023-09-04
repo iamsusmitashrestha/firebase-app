@@ -1,5 +1,4 @@
 import 'package:firebase_app/features/login/login_screen.dart';
-import 'package:firebase_app/features/profile/profile_provider.dart';
 import 'package:firebase_app/features/profile/profile_screen.dart';
 import 'package:firebase_app/features/signup/signup_provider.dart';
 import 'package:firebase_app/features/signup/signup_screen.dart';
@@ -33,16 +32,13 @@ class MyApp extends StatelessWidget {
         "/": (context) => const SplashScreen(),
         "/login": (context) => ChangeNotifierProvider(
               create: (context) => AuthProvider(context),
-              child: LoginScreen(),
+              child: const LoginScreen(),
             ),
         "/signup": (context) => ChangeNotifierProvider(
               create: (context) => SignupProvider(context),
-              child: SignupScreen(),
+              child: const SignupScreen(),
             ),
-        "/profile": (context) => ChangeNotifierProvider(
-              create: (context) => ProfileProvider(),
-              child: ProfileScreen(),
-            ),
+        "/profile": (context) => ProfileScreen()
       },
     );
   }
