@@ -34,8 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentSnapshot userSnapshot =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      // userRef.get().then(
-      //     (DocumentSnapshot documentSnapshot) => {print(documentSnapshot)});
+
       setState(() {
         fullName = userSnapshot['fullName'];
         email = userSnapshot['email'];
@@ -56,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-    final user = FirebaseAuth.instance.currentUser!;
+    final user = _firebaseAuth.currentUser!;
 
     return Scaffold(
       body: SafeArea(
@@ -77,15 +76,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
               isRequired: false,
             ),
             mHeightSpan,
-            SizedBox(
-              width: 200,
-              child: KButton(
-                  child: const Text("Logout"),
-                  onPressed: () => {
-                        _firebaseAuth.signOut(),
-                        Navigator.of(context).pushReplacementNamed("/login"),
-                      }),
-            )
+            Row(
+              children: [
+                Expanded(
+                  child:
+                      KButton(child: const Text("Save"), onPressed: () => {}),
+                ),
+                elWidthSpan,
+                Expanded(
+                  child: KButton(
+                      child: const Text("Logout"),
+                      onPressed: () => {
+                            _firebaseAuth.signOut(),
+                            Navigator.of(context)
+                                .pushReplacementNamed("/login"),
+                          }),
+                ),
+              ],
+            ),
           ],
         ),
       ),

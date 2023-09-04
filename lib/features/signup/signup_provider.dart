@@ -66,7 +66,7 @@ class SignupProvider extends ChangeNotifier {
 
 // Add a new document with a generated ID
       _db.collection("users").add(user).then((DocumentReference doc) =>
-          print('DocumentSnapshot added with ID: ${doc.id}'));
+          print('Hello DocumentSnapshot added with ID: ${doc.id}'));
 
       saveUserDataOffline(_fullName!, _email!);
 
