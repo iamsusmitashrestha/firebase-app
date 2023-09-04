@@ -1,5 +1,7 @@
 import 'package:firebase_app/features/login/auth_provider.dart';
 import 'package:firebase_app/features/login/login_screen.dart';
+import 'package:firebase_app/features/login/reset_password_provider.dart';
+import 'package:firebase_app/features/login/reset_password_screen.dart';
 import 'package:firebase_app/features/profile/profile_screen.dart';
 import 'package:firebase_app/features/signup/signup_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -35,6 +37,10 @@ class MyApp extends StatelessWidget {
             ),
         "/signup": (context) => const SignupScreen(),
         "/profile": (context) => const ProfileScreen(),
+        "/reset": (context) => ChangeNotifierProvider(
+              create: (context) => ResetPasswordProvider(),
+              child: ResetPasswordScreen(),
+            ),
       },
     );
   }

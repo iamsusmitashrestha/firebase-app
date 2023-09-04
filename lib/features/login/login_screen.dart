@@ -134,7 +134,8 @@ class LoginScreen extends StatelessWidget {
                                                     content: Text(
                                                       value.error!,
                                                       style: const TextStyle(
-                                                          color: Colors.white),
+                                                        color: Colors.white,
+                                                      ),
                                                     ),
                                                   ),
                                                 )
@@ -143,7 +144,22 @@ class LoginScreen extends StatelessWidget {
                                         );
                                   }
                                 },
-                              )
+                              ),
+                              mHeightSpan,
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pushReplacementNamed(
+                                      context, "/reset");
+                                },
+                                child: const Text(
+                                  "Forget Password?",
+                                  style: TextStyle(
+                                    color: Colors.purple,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
