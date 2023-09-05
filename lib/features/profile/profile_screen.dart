@@ -15,6 +15,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String fullName = "";
   String email = "";
+  late Future<void> dbFuture;
   final _db = FirebaseFirestore.instance;
 
   void onFullNameChanged(value) {
@@ -39,16 +40,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         fullName = userSnapshot['fullName'];
         email = userSnapshot['email'];
       });
-      print("Data fetched successfully");
     } catch (e) {
       print("Error fetching data: $e");
     }
   }
 
+  updateUserData() {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    final DocumentReference documentReference =
+        FirebaseFirestore.instance.collection('users').doc(uid);
+
+    documentReference.update({
+      'fullName': fullName,
+      'email': email,
+    });
+  }
+
   @override
   void initState() {
-    fetchUserData();
-
+    dbFuture = fetchUserData();
     super.initState();
   }
 
@@ -59,43 +70,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: mPadding,
-          children: [
-            KTextFormField(
-              label: "Full name",
-              initialValue: user.displayName,
-              onChanged: onFullNameChanged,
-              isRequired: false,
-            ),
-            mHeightSpan,
-            KTextFormField(
-              label: "Email",
-              initialValue: user.email,
-              onChanged: onEmailChanged,
-              isRequired: false,
-            ),
-            mHeightSpan,
-            Row(
-              children: [
-                Expanded(
-                  child:
-                      KButton(child: const Text("Save"), onPressed: () => {}),
-                ),
-                elWidthSpan,
-                Expanded(
-                  child: KButton(
-                      child: const Text("Logout"),
-                      onPressed: () => {
-                            _firebaseAuth.signOut(),
-                            Navigator.of(context)
-                                .pushReplacementNamed("/login"),
-                          }),
-                ),
-              ],
-            ),
-          ],
-        ),
+        child: FutureBuilder(
+            future: dbFuture,
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                ); // your widget while loading
+              } else if (snapshot.hasError) {
+                return Text("Error: ${snapshot.error}");
+              }
+              return ListView(
+                padding: mPadding,
+                children: [
+                  KTextFormField(
+                    label: "Full name",
+                    initialValue: fullName,
+                    onChanged: onFullNameChanged,
+                    isRequired: false,
+                  ),
+                  mHeightSpan,
+                  KTextFormField(
+                    label: "Email",
+                    initialValue: email,
+                    onChanged: onEmailChanged,
+                    isRequired: false,
+                  ),
+                  mHeightSpan,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: KButton(
+                          child: const Text("Save"),
+                          onPressed: updateUserData,
+                        ),
+                      ),
+                      elWidthSpan,
+                      Expanded(
+                        child: KButton(
+                            child: const Text("Logout"),
+                            onPressed: () => {
+                                  _firebaseAuth.signOut(),
+                                  Navigator.of(context)
+                                      .pushReplacementNamed("/login"),
+                                }),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
