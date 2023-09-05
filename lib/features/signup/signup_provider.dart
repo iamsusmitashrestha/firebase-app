@@ -56,17 +56,8 @@ class SignupProvider extends ChangeNotifier {
       notifyListeners();
 
       await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: _email!, password: _password!);
-
-      // Create a new user with a first and last name
-      final user = <String, dynamic>{
-        "fullName": _fullName,
-        "email": _email,
-      };
-
-// Add a new document with a generated ID
-      _db.collection("users").add(user).then((DocumentReference doc) =>
-          {print('DocumentSnapshot added with ID: ${doc.id}')});
+          .createUserWithEmailAndPassword(email: _email!, password: _password!)
+          .then((value) => saveUserInFireStore(value));
 
       saveUserDataOffline(_fullName!, _email!);
 
@@ -101,5 +92,12 @@ class SignupProvider extends ChangeNotifier {
   void resetError() {
     _error = null;
     notifyListeners();
+  }
+
+  void saveUserInFireStore(UserCredential userCredential) {
+    _db
+        .collection('users')
+        .doc(userCredential.user?.uid)
+        .set({'fullName': _fullName, 'email': _email});
   }
 }
