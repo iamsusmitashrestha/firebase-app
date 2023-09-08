@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app/common/constants/ui_helpers.dart';
 import 'package:firebase_app/common/widgets/k_button.dart';
 import 'package:firebase_app/common/widgets/k_text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../data/models/user.dart';
+import '../../services/shared_preference_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,8 +21,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String fullName = "";
   String email = "";
-  late Future<void> dbFuture;
-  final _db = FirebaseFirestore.instance;
+  bool _loading = false;
+  late Future<UserModel> dbFuture;
+  final prefs = SharedPreferencesService();
 
   void onFullNameChanged(value) {
     setState(() {
@@ -30,36 +37,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future<void> fetchUserData() async {
+  updateUserData() async {
     try {
+      _setLoading(true);
+      final user = FirebaseAuth.instance.currentUser;
       String uid = FirebaseAuth.instance.currentUser!.uid;
-      DocumentSnapshot userSnapshot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
-      setState(() {
-        fullName = userSnapshot['fullName'];
-        email = userSnapshot['email'];
+      final DocumentReference documentReference =
+          FirebaseFirestore.instance.collection('users').doc(uid);
+
+      UserModel userModel = UserModel(
+        id: uid,
+        fullName: fullName,
+        email: email,
+      );
+
+      await documentReference.update({
+        'fullName': fullName,
+        'email': email,
       });
+
+      await user!.updateEmail(email);
+
+      prefs.saveUserDataOffline(userModel);
+
+      _setLoading(false);
     } catch (e) {
-      print("Error fetching data: $e");
+      print("Error on updating user details $e");
+      _setLoading(false);
     }
   }
 
-  updateUserData() {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-
-    final DocumentReference documentReference =
-        FirebaseFirestore.instance.collection('users').doc(uid);
-
-    documentReference.update({
-      'fullName': fullName,
-      'email': email,
+  void _setLoading(bool value) {
+    setState(() {
+      _loading = value;
     });
   }
 
   @override
   void initState() {
-    dbFuture = fetchUserData();
+    dbFuture = prefs.getUserDataOffline();
     super.initState();
   }
 
@@ -76,23 +93,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(
                   child: CircularProgressIndicator(),
-                ); // your widget while loading
+                );
               } else if (snapshot.hasError) {
                 return Text("Error: ${snapshot.error}");
               }
+
+              final userModel = snapshot.data;
+
               return ListView(
                 padding: mPadding,
                 children: [
                   KTextFormField(
                     label: "Full name",
-                    initialValue: fullName,
+                    initialValue: userModel.fullName,
                     onChanged: onFullNameChanged,
                     isRequired: false,
                   ),
                   mHeightSpan,
                   KTextFormField(
                     label: "Email",
-                    initialValue: email,
+                    initialValue: userModel.email,
                     onChanged: onEmailChanged,
                     isRequired: false,
                   ),
@@ -101,8 +121,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Expanded(
                         child: KButton(
-                          child: const Text("Save"),
                           onPressed: updateUserData,
+                          child: _loading
+                              ? const CircularProgressIndicator()
+                              : const Text("Save"),
                         ),
                       ),
                       elWidthSpan,

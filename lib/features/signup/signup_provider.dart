@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_app/data/models/user.dart';
+import 'package:firebase_app/services/shared_preference_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupProvider extends ChangeNotifier {
   final BuildContext context;
   final _db = FirebaseFirestore.instance;
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final formKey = GlobalKey<FormState>();
+  final prefs = SharedPreferencesService();
 
   SignupProvider(this.context);
   String? _error;
@@ -37,38 +38,23 @@ class SignupProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveUserDataOffline(String fullName, String email) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('fullName', fullName);
-    prefs.setString('email', email);
-  }
-
-  Future<Map<String, String>> getUserDataOffline() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String fullName = prefs.getString('fullName') ?? '';
-    String email = prefs.getString('email') ?? '';
-    return {'fullName': fullName, 'email': email};
-  }
-
   Future<void> signup() async {
     try {
       _setLoading(true);
       notifyListeners();
 
       await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: _email!, password: _password!);
+          .createUserWithEmailAndPassword(email: _email!, password: _password!)
+          .then((value) {
+        UserModel user = UserModel(
+          id: value.user!.uid,
+          fullName: _fullName!,
+          email: value.user!.email!,
+        );
 
-      // Create a new user with a first and last name
-      final user = <String, dynamic>{
-        "fullName": _fullName,
-        "email": _email,
-      };
-
-// Add a new document with a generated ID
-      _db.collection("users").add(user).then((DocumentReference doc) =>
-          print('Hello DocumentSnapshot added with ID: ${doc.id}'));
-
-      saveUserDataOffline(_fullName!, _email!);
+        saveUserInFireStore(value);
+        prefs.saveUserDataOffline(user);
+      });
 
       Navigator.pushReplacementNamed(context, "/login");
 
@@ -101,5 +87,12 @@ class SignupProvider extends ChangeNotifier {
   void resetError() {
     _error = null;
     notifyListeners();
+  }
+
+  void saveUserInFireStore(UserCredential userCredential) {
+    _db
+        .collection('users')
+        .doc(userCredential.user?.uid)
+        .set({'fullName': _fullName, 'email': _email});
   }
 }
