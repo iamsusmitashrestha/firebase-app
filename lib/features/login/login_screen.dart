@@ -1,14 +1,12 @@
 import 'package:firebase_app/data/provider/auth_provider.dart';
+import 'package:firebase_app/themes/app_themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import 'package:firebase_app/themes/app_themes.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/constants/ui_helpers.dart';
 import '../../common/widgets/common_button.dart';
 import '../../common/widgets/common_text_form_field.dart';
-import '../profile/profile_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,10 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     _formKey.currentState!.save();
-    setState(() {
-      _isLoading = true;
-    });
     try {
+      setState(() {
+        _isLoading = true;
+      });
       await Provider.of<AuthProvider>(context, listen: false)
           .login(_authData['email']!, _authData['password']!);
       if (mounted) {
@@ -168,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              "Doesn't have account ? ",
+                              "Doesn't have account ?",
                               style: TextStyle(fontWeight: FontWeight.w500),
                             ),
                             InkWell(
@@ -179,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: const Text(
                                 "Sign up",
                                 style: TextStyle(
-                                  color: Colors.purple,
+                                  color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),

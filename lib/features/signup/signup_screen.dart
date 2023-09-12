@@ -1,11 +1,10 @@
-import 'package:firebase_app/features/signup/signup_provider.dart';
+import 'package:firebase_app/data/provider/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../common/widgets/common_button.dart';
 import '../../common/constants/ui_helpers.dart';
+import '../../common/widgets/common_button.dart';
 import '../../common/widgets/common_text_form_field.dart';
-import '../../themes/app_themes.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -15,6 +14,13 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  String? _fullName;
+  String? _email;
+  String? _password;
+  bool _loading = false;
+
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +63,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: const Text(
                         "Sign in",
                         style: TextStyle(
-                          color: Colors.purple,
+                          color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -69,16 +75,15 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
           elHeightSpan,
-          Consumer<SignupProvider>(
-            builder: (context, value, child) => Container(
+          Consumer<AuthProvider>(
+            builder: (context, data, child) => Container(
               padding: lPadding,
               child: Form(
-                key: value.formKey,
+                key: _formKey,
                 child: Column(
                   children: [
                     KTextFormField(
                       label: "Full Name",
-                      onChanged: value.onFullNameChanged,
                       validator: (name) {
                         RegExp regex = RegExp(r"^[A-Z][a-z]*\s[A-Z][a-z]*$");
 
@@ -91,7 +96,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     mHeightSpan,
                     KTextFormField(
                       label: "Email",
-                      onChanged: value.onEmailChanged,
                       validator: (email) {
                         RegExp regex =
                             RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
@@ -105,7 +109,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     KTextFormField(
                       label: "Password",
                       isPassword: true,
-                      onChanged: value.onPasswordChanged,
                       validator: (password) {
                         if (password == null || password.isEmpty) {
                           return "Please enter password";
@@ -136,29 +139,30 @@ class _SignupScreenState extends State<SignupScreen> {
                           fontSize: 16,
                         ),
                       ),
-                      onPressed: () {
-                        if (value.formKey.currentState!.validate()) {
-                          value.signup().then(
-                                (v) => {
-                                  if (value.error != null)
-                                    {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: PRIMARY_COLOR,
-                                          content: Text(
-                                            value.error!,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    }
-                                },
-                              );
-                        }
-                      },
+                      onPressed: () {},
+                      // onPressed: () {
+                      //   if (data.formKey.currentState!.validate()) {
+                      //     data.signup().then(
+                      //           (v) => {
+                      //             if (data.error != null)
+                      //               {
+                      //                 ScaffoldMessenger.of(context)
+                      //                     .showSnackBar(
+                      //                   SnackBar(
+                      //                     backgroundColor: PRIMARY_COLOR,
+                      //                     content: Text(
+                      //                       data.error!,
+                      //                       style: const TextStyle(
+                      //                         color: Colors.white,
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 )
+                      //               }
+                      //           },
+                      //         );
+                      //   }
+                      // },
                     ),
                   ],
                 ),

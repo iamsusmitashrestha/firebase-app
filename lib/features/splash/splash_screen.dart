@@ -1,10 +1,7 @@
 import 'package:firebase_app/common/constants/asset_source.dart';
 import 'package:firebase_app/data/provider/auth_provider.dart';
-import 'package:firebase_app/features/profile/profile_screen.dart';
-import 'package:firebase_app/services/shared_preference_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
