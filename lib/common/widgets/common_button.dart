@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../themes/app_themes.dart';
 import '../constants/ui_helpers.dart';
 
-class KButton extends StatelessWidget {
+class CommonButton extends StatelessWidget {
   final Widget child;
   final void Function() onPressed;
   final bool isBusy;
-  const KButton({
+  const CommonButton({
     super.key,
     required this.child,
     required this.onPressed,

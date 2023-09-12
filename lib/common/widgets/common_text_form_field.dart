@@ -5,12 +5,13 @@ import '../constants/ui_helpers.dart';
 
 class KTextFormField extends StatefulWidget {
   final String? Function(String?)? validator;
-  final void Function(dynamic)? onChanged;
+  final void Function(String)? onChanged;
+  final void Function(String?)? onSaved;
   final TextEditingController? controller;
   final String? hint;
   final String? initialValue;
   final String? label;
-  final bool obscureText;
+  final bool isPassword;
   final bool isRequired;
   final TextInputType keyboardType;
   final int maxLines;
@@ -25,21 +26,20 @@ class KTextFormField extends StatefulWidget {
       this.initialValue,
       this.label,
       this.keyboardType = TextInputType.text,
-      this.obscureText = false,
+      this.isPassword = false,
       this.maxLines = 1,
       this.prefixIcon,
-      this.isRequired = true});
+      this.isRequired = true,
+      this.onSaved});
 
   @override
-  State<KTextFormField> createState() =>
-      _KTextFormFieldState(obscureText: obscureText);
+  State<KTextFormField> createState() => _KTextFormFieldState();
 }
 
 class _KTextFormFieldState extends State<KTextFormField> {
   String? errorText;
   bool interacted = false;
-  bool obscureText;
-  _KTextFormFieldState({required this.obscureText});
+  bool obscureText = false;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +84,7 @@ class _KTextFormFieldState extends State<KTextFormField> {
                   : const BorderSide(color: LIGHT_PRIMARY_COLOR),
             ),
             prefixIcon: widget.prefixIcon,
-            suffixIcon: widget.obscureText
+            suffixIcon: widget.isPassword
                 ? Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: IconButton(
@@ -113,6 +113,7 @@ class _KTextFormFieldState extends State<KTextFormField> {
 
             widget.onChanged?.call(value);
           },
+          onSaved: widget.onSaved,
         ),
         if (errorText != null)
           Column(

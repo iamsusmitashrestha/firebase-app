@@ -2,14 +2,19 @@ import 'package:firebase_app/features/signup/signup_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../common/widgets/k_button.dart';
+import '../../common/widgets/common_button.dart';
 import '../../common/constants/ui_helpers.dart';
-import '../../common/widgets/k_text_form_field.dart';
+import '../../common/widgets/common_text_form_field.dart';
 import '../../themes/app_themes.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +51,9 @@ class SignupScreen extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).pushReplacementNamed("/login");
+                      },
                       child: const Text(
                         "Sign in",
                         style: TextStyle(
@@ -97,7 +104,7 @@ class SignupScreen extends StatelessWidget {
                     mHeightSpan,
                     KTextFormField(
                       label: "Password",
-                      obscureText: true,
+                      isPassword: true,
                       onChanged: value.onPasswordChanged,
                       validator: (password) {
                         if (password == null || password.isEmpty) {
@@ -121,8 +128,8 @@ class SignupScreen extends StatelessWidget {
                         }
                       },
                     ),
-                    elHeightSpan,
-                    KButton(
+                    lHeightSpan,
+                    CommonButton(
                       child: const Text(
                         "Sign up",
                         style: TextStyle(
@@ -142,7 +149,8 @@ class SignupScreen extends StatelessWidget {
                                           content: Text(
                                             value.error!,
                                             style: const TextStyle(
-                                                color: Colors.white),
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       )
@@ -151,13 +159,12 @@ class SignupScreen extends StatelessWidget {
                               );
                         }
                       },
-                    )
+                    ),
                   ],
                 ),
               ),
             ),
           ),
-          lHeightSpan,
         ],
       ),
     );

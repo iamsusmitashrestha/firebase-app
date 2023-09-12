@@ -50,10 +50,11 @@ class SignupProvider extends ChangeNotifier {
           id: value.user!.uid,
           fullName: _fullName!,
           email: value.user!.email!,
+          imageUrl: "",
         );
 
         saveUserInFireStore(value);
-        prefs.saveUserDataOffline(user);
+        SharedPreferencesService.saveUserDataOffline(user);
       });
 
       Navigator.pushReplacementNamed(context, "/login");

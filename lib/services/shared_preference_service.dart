@@ -4,34 +4,56 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/user.dart';
 
+// class SharedPreferencesService {
+//   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+//   SharedPreferencesService();
+
+//   Future<void> saveUserDataOffline(UserModel user) async {
+//     final userJson = jsonEncode(user.toJson());
+//     _prefs.then((pref) async => await pref.setString('userData', userJson));
+//   }
+
+//   Future<UserModel> getUserDataOffline() async {
+//     return _prefs.then((pref) async => getUser(pref));
+//   }
+
+//   Future<UserModel> getUser(SharedPreferences pref) async {
+//     final userData = pref.getString('userData');
+//     pref.reload();
+//     final userModel = UserModel.fromJson(jsonDecode(userData!));
+//     return userModel;
+//   }
+// }
+
 class SharedPreferencesService {
-  SharedPreferences? _prefs;
-
-  SharedPreferencesService() {
-    _initPreferences();
-  }
-
-  Future<void> _initPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-  }
-
-  Future<void> saveUserDataOffline(UserModel user) async {
-    if (_prefs == null) {
-      await _initPreferences();
-    }
+  static Future<void> saveUserDataOffline(UserModel user) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final userJson = jsonEncode(user.toJson());
-    await _prefs!.setString('userData', userJson);
+    await prefs.setString('userData', userJson);
   }
 
-  Future<UserModel> getUserDataOffline() async {
-    if (_prefs == null) {
-      await _initPreferences();
+  static Future<UserModel?> getUserDataOffline() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      final userData = prefs.getString('userData') ?? '';
+
+      if (userData.isNotEmpty) {
+        final userModel = UserModel.fromJson(jsonDecode(userData));
+        return userModel;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("get user data offline $e");
+      return null;
     }
+  }
 
-    final userData = _prefs!.getString('userData') ?? '';
-
-    final userModel = UserModel.fromJson(jsonDecode(userData));
-    return userModel;
+  static Future<void> clearUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
   }
 }
