@@ -6,6 +6,7 @@ class ValidatorService {
       return "Please enter full name";
     }
     if (!regex.hasMatch(fullName)) return "Invalid full name";
+    return null;
   }
 
   static String? validateEmail(String? email) {
@@ -14,6 +15,7 @@ class ValidatorService {
       return "Please enter email";
     }
     if (!regex.hasMatch(email)) return "Invalid email";
+    return null;
   }
 
   static String? validatePassword(String? password) {
@@ -36,5 +38,6 @@ class ValidatorService {
     if (!password.contains(RegExp(r'[#?!@$%^&*-]'))) {
       return "Password must have special characters";
     }
+    return null;
   }
 }

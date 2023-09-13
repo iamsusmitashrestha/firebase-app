@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/shared_preference_service.dart';
@@ -8,8 +11,10 @@ import '../models/user.dart';
 class AuthProvider with ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _firebaseStorage = FirebaseStorage.instance;
 
   UserModel? _currentUser;
+  String? imageUrl;
 
   UserModel? get currentUser => _currentUser;
 
@@ -71,20 +76,27 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateUserData(String fullName, String email) async {
+  Future<void> updateUserData(
+      String fullName, String email, File imageFile) async {
     try {
-      //TODO: Add image file and upload it to firebase storage
-      // Get url from firebase storage and update it with imageUrl
+      final storageRef =
+          _firebaseStorage.ref().child('profile/${currentUser!.id}');
+      final uploadImage = storageRef.putFile(imageFile);
+
+      // Wait for the upload to complete and get the download URL
+      final snapshot = await uploadImage;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      imageUrl = downloadUrl;
+
       final DocumentReference documentReference =
           _firestore.collection('users').doc(_currentUser!.id);
 
-      await documentReference.update({
-        'fullName': fullName,
-        'email': email,
-      });
+      await documentReference
+          .update({'fullName': fullName, 'email': email, 'imageUrl': imageUrl});
 
       await _firebaseAuth.currentUser!.updateEmail(email);
-      _currentUser!.copyWith(email: email, fullName: fullName);
+      _currentUser!
+          .copyWith(email: email, fullName: fullName, imageUrl: imageUrl);
 
       await SharedPreferencesService.saveUserDataOffline(_currentUser!);
       notifyListeners();
@@ -99,7 +111,7 @@ class AuthProvider with ChangeNotifier {
       await SharedPreferencesService.clearUserData();
       notifyListeners();
     } catch (e) {
-      print(e);
+      rethrow;
     }
   }
 

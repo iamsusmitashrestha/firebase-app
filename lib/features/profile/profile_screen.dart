@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:firebase_app/common/constants/ui_helpers.dart';
 import 'package:firebase_app/common/widgets/button_loading_indicator.dart';
 import 'package:firebase_app/common/widgets/common_button.dart';
 import 'package:firebase_app/common/widgets/common_text_form_field.dart';
 import 'package:firebase_app/data/provider/auth_provider.dart';
+import 'package:firebase_app/services/validation_service.dart';
+import 'package:firebase_app/themes/app_themes.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,10 +21,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String _fullName = "";
   String _email = "";
-  bool _loading = false;
+  bool _isLoading = false;
+  File? _imageFile;
+
+  final _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
-  void updateUserData() async {
+  Future<void> updateUserData() async {
     if (_formKey.currentState?.validate() == false) {
       return;
     }
@@ -28,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _setLoading(true);
 
       await Provider.of<AuthProvider>(context, listen: false)
-          .updateUserData(_fullName, _email);
+          .updateUserData(_fullName, _email, _imageFile!);
     } catch (e) {
       print("Error on updating user details $e");
     } finally {
@@ -38,8 +46,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _setLoading(bool value) {
     setState(() {
-      _loading = value;
+      _isLoading = value;
     });
+  }
+
+  // Select image from gallery
+  Future<void> selectImage() async {
+    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    var file = File(pickedImage!.path);
+    setState(() {
+      _imageFile = file;
+    });
+  }
+
+  Future<void> logout() async {
+    try {
+      _setLoading(true);
+      await Provider.of<AuthProvider>(context, listen: false).logout();
+    } catch (e) {
+      print(e);
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override
@@ -68,26 +96,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         mHeightSpan,
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage: currentUser.imageUrl.isNotEmpty
-                              ? NetworkImage(currentUser.imageUrl)
-                              : null,
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 60,
+                              backgroundImage: (_imageFile != null)
+                                  ? FileImage(File(_imageFile!.path))
+                                      as ImageProvider<Object>?
+                                  : (currentUser.imageUrl.isNotEmpty)
+                                      ? NetworkImage(currentUser.imageUrl)
+                                      : null,
+                            ),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: PRIMARY_COLOR,
+                              ),
+                              child: IconButton(
+                                onPressed: selectImage,
+                                icon: const Icon(
+                                  Icons.edit_outlined,
+                                  size: 20,
+                                ),
+                                color: Colors.white,
+                                autofocus: true,
+                              ),
+                            ),
+                          ],
                         ),
                         mHeightSpan,
                         CommonTextFormField(
                           label: "Full name",
                           initialValue: currentUser.fullName,
-                          validator: (name) {
-                            RegExp regex =
-                                RegExp(r"^[A-Z][a-z]*\s[A-Z][a-z]*$");
-
-                            if (name == null || name.isEmpty) {
-                              return "Please enter full name";
-                            }
-                            if (!regex.hasMatch(name))
-                              return "Invalid full name";
-                          },
+                          validator: ValidatorService.validateFullName,
                           onSaved: (value) {
                             setState(() {
                               _fullName = value ?? '';
@@ -98,14 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         CommonTextFormField(
                           label: "Email",
                           initialValue: currentUser.email,
-                          validator: (email) {
-                            RegExp regex =
-                                RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-                            if (email == null || email.isEmpty) {
-                              return "Please enter email";
-                            }
-                            if (!regex.hasMatch(email)) return "Invalid email";
-                          },
+                          validator: ValidatorService.validateEmail,
                           onSaved: (value) {
                             setState(() {
                               _email = value ?? '';
@@ -118,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Expanded(
                               child: CommonButton(
                                 onPressed: updateUserData,
-                                child: _loading
+                                child: _isLoading
                                     ? const ButtonLoadingIndicator()
                                     : const Text("Save"),
                               ),
@@ -126,13 +162,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             elWidthSpan,
                             Expanded(
                               child: CommonButton(
-                                  child: const Text("Logout"),
+                                  child: _isLoading
+                                      ? const ButtonLoadingIndicator()
+                                      : const Text("Logout"),
                                   onPressed: () async {
                                     await Provider.of<AuthProvider>(context,
                                             listen: false)
                                         .logout();
-                                    Navigator.of(context)
-                                        .pushReplacementNamed("/login");
+                                    if (mounted) {
+                                      Navigator.of(context)
+                                          .pushReplacementNamed("/login");
+                                    }
                                   }),
                             ),
                           ],

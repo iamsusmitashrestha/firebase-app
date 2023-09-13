@@ -72,7 +72,7 @@ class _CommonTextFormFieldState extends State<CommonTextFormField> {
         TextFormField(
           controller: widget.controller,
           keyboardType: widget.keyboardType,
-          obscureText: widget.isPassword,
+          obscureText: widget.isPassword ? !obscureText : obscureText,
           initialValue: widget.initialValue,
           maxLines: widget.maxLines,
           validator: widget.validator,
