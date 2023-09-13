@@ -1,4 +1,5 @@
 import 'package:firebase_app/common/constants/ui_helpers.dart';
+import 'package:firebase_app/common/widgets/button_loading_indicator.dart';
 import 'package:firebase_app/common/widgets/common_button.dart';
 import 'package:firebase_app/common/widgets/common_text_form_field.dart';
 import 'package:firebase_app/data/provider/auth_provider.dart';
@@ -74,9 +75,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : null,
                         ),
                         mHeightSpan,
-                        KTextFormField(
+                        CommonTextFormField(
                           label: "Full name",
                           initialValue: currentUser.fullName,
+                          validator: (name) {
+                            RegExp regex =
+                                RegExp(r"^[A-Z][a-z]*\s[A-Z][a-z]*$");
+
+                            if (name == null || name.isEmpty) {
+                              return "Please enter full name";
+                            }
+                            if (!regex.hasMatch(name))
+                              return "Invalid full name";
+                          },
                           onSaved: (value) {
                             setState(() {
                               _fullName = value ?? '';
@@ -84,9 +95,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
                         mHeightSpan,
-                        KTextFormField(
+                        CommonTextFormField(
                           label: "Email",
                           initialValue: currentUser.email,
+                          validator: (email) {
+                            RegExp regex =
+                                RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                            if (email == null || email.isEmpty) {
+                              return "Please enter email";
+                            }
+                            if (!regex.hasMatch(email)) return "Invalid email";
+                          },
                           onSaved: (value) {
                             setState(() {
                               _email = value ?? '';
@@ -100,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: CommonButton(
                                 onPressed: updateUserData,
                                 child: _loading
-                                    ? const CircularProgressIndicator()
+                                    ? const ButtonLoadingIndicator()
                                     : const Text("Save"),
                               ),
                             ),

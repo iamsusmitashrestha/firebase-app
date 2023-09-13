@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../models/user.dart';
 import '../../services/shared_preference_service.dart';
+import '../models/user.dart';
 
 class AuthProvider with ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -13,6 +13,35 @@ class AuthProvider with ChangeNotifier {
 
   UserModel? get currentUser => _currentUser;
 
+  Future<void> signup(String? fullName, String? email, String? password) async {
+    try {
+      await _firebaseAuth
+          .createUserWithEmailAndPassword(email: email!, password: password!)
+          .then((value) async {
+        UserModel user = UserModel(
+          id: value.user!.uid,
+          fullName: fullName!,
+          email: value.user!.email!,
+          imageUrl: "",
+        );
+
+        await saveUserInFireStore(user);
+        await SharedPreferencesService.saveUserDataOffline(user);
+        notifyListeners();
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveUserInFireStore(UserModel user) async {
+    await _firestore.collection('users').doc(user.id).set({
+      'fullName': user.fullName,
+      'email': user.email,
+      'imageUrl': user.imageUrl
+    });
+  }
+
   Future<void> fetchUserData() async {
     try {
       String uid = _firebaseAuth.currentUser!.uid;
@@ -21,12 +50,11 @@ class AuthProvider with ChangeNotifier {
 
       _currentUser = UserModel(
           id: uid,
-          fullName: userSnapshot['fullName'],
-          email: userSnapshot['email'],
+          fullName: userSnapshot['fullName'] ?? userSnapshot['fullName'],
+          email: userSnapshot['email'] ?? userSnapshot['email'],
           imageUrl: userSnapshot['imageUrl']);
       await SharedPreferencesService.saveUserDataOffline(_currentUser!);
     } catch (e) {
-      print("Error fetching data: $e");
       rethrow;
     }
   }
@@ -61,7 +89,6 @@ class AuthProvider with ChangeNotifier {
       await SharedPreferencesService.saveUserDataOffline(_currentUser!);
       notifyListeners();
     } catch (e) {
-      print("Error on updating user details $e");
       rethrow;
     }
   }

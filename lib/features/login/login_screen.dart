@@ -1,4 +1,6 @@
+import 'package:firebase_app/common/widgets/button_loading_indicator.dart';
 import 'package:firebase_app/data/provider/auth_provider.dart';
+import 'package:firebase_app/services/validation_service.dart';
 import 'package:firebase_app/themes/app_themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -110,16 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         mHeightSpan,
-                        KTextFormField(
+                        CommonTextFormField(
                           label: "Email",
-                          validator: (value) {
-                            RegExp regex =
-                                RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-                            if (!regex.hasMatch(value!)) {
-                              return "Invalid email";
-                            }
-                            return null;
-                          },
+                          validator: ValidatorService.validateEmail,
                           onChanged: (value) {
                             setState(() {
                               _authData['email'] = value;
@@ -127,22 +122,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         mHeightSpan,
-                        KTextFormField(
+                        CommonTextFormField(
                           label: "Password",
                           isPassword: true,
-                          validator: (value) {
-                            RegExp regex = RegExp(
-                                r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-                            if (value!.isEmpty) {
-                              return 'Please enter password';
-                            } else {
-                              if (!regex.hasMatch(value)) {
-                                return 'Enter valid password';
-                              } else {
-                                return null;
-                              }
-                            }
-                          },
+                          validator: ValidatorService.validatePassword,
                           onChanged: (value) {
                             setState(() {
                               _authData['password'] = value;
@@ -153,11 +136,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         CommonButton(
                           onPressed: _saveForm,
                           child: _isLoading
-                              ? const CircularProgressIndicator()
+                              ? const ButtonLoadingIndicator()
                               : const Text(
                                   "Sign in",
                                   style: TextStyle(
                                     fontSize: 16,
+                                    color: Colors.white,
                                   ),
                                 ),
                         ),
@@ -177,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: const Text(
                                 "Sign up",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.purple,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),

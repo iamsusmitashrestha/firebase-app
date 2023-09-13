@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../themes/app_themes.dart';
 import '../constants/ui_helpers.dart';
 
-class KTextFormField extends StatefulWidget {
+class CommonTextFormField extends StatefulWidget {
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final void Function(String?)? onSaved;
@@ -17,7 +17,7 @@ class KTextFormField extends StatefulWidget {
   final int maxLines;
   final Widget? prefixIcon;
 
-  const KTextFormField(
+  const CommonTextFormField(
       {super.key,
       this.validator,
       this.onChanged,
@@ -33,10 +33,10 @@ class KTextFormField extends StatefulWidget {
       this.onSaved});
 
   @override
-  State<KTextFormField> createState() => _KTextFormFieldState();
+  State<CommonTextFormField> createState() => _CommonTextFormFieldState();
 }
 
-class _KTextFormFieldState extends State<KTextFormField> {
+class _CommonTextFormFieldState extends State<CommonTextFormField> {
   String? errorText;
   bool interacted = false;
   bool obscureText = false;
@@ -72,7 +72,7 @@ class _KTextFormFieldState extends State<KTextFormField> {
         TextFormField(
           controller: widget.controller,
           keyboardType: widget.keyboardType,
-          obscureText: obscureText,
+          obscureText: widget.isPassword,
           initialValue: widget.initialValue,
           maxLines: widget.maxLines,
           validator: widget.validator,
