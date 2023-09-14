@@ -1,7 +1,7 @@
 import 'package:firebase_app/common/widgets/button_loading_indicator.dart';
 import 'package:firebase_app/data/provider/auth_provider.dart';
-import 'package:firebase_app/services/validation_service.dart';
-import 'package:firebase_app/themes/app_themes.dart';
+import 'package:firebase_app/utils/snackbar_util.dart';
+import 'package:firebase_app/utils/validation_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -40,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await Provider.of<AuthProvider>(context, listen: false)
           .login(_authData['email']!, _authData['password']!);
       if (mounted) {
+        SnackbarUtil.showSnackbar(context, "Logged in successfully");
         Navigator.pushReplacementNamed(context, "/profile");
       }
     } on FirebaseAuthException catch (e) {
@@ -51,9 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         errorMessage = "Something went wrong. Please try again.";
       }
-      _showErrorSnackbar(errorMessage);
+      SnackbarUtil.showSnackbar(context, errorMessage);
     } catch (e) {
-      _showErrorSnackbar("Something went wrong. Please try again.");
+      SnackbarUtil.showSnackbar(
+          context, "Something went wrong. Please try again.");
     } finally {
       if (mounted) {
         setState(() {
@@ -61,18 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     }
-  }
-
-  void _showErrorSnackbar(String errorMessage) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: PRIMARY_COLOR,
-        content: Text(
-          errorMessage,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
-    );
   }
 
   @override
@@ -84,14 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ListView(
             padding: sPagePadding,
             children: [
-              Column(
-                children: [
-                  Image.asset(
-                    "./assets/images/man.jpg",
-                    width: 300,
-                    height: 300,
-                  ),
-                ],
+              Image.asset(
+                "./assets/images/man.jpg",
+                width: 260,
+                height: 260,
               ),
               mHeightSpan,
               Consumer<AuthProvider>(
@@ -101,10 +87,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        const Text(
+                          "Greetings !",
+                          style: TextStyle(
+                            color: Colors.purple,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        lHeightSpan,
                         const Align(
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "LOGIN",
+                            "Login",
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
@@ -114,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         mHeightSpan,
                         CommonTextFormField(
                           label: "Email",
-                          validator: ValidatorService.validateEmail,
+                          validator: ValidationUtils.validateEmail,
                           onChanged: (value) {
                             setState(() {
                               _authData['email'] = value;
@@ -125,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CommonTextFormField(
                           label: "Password",
                           isPassword: true,
-                          validator: ValidatorService.validatePassword,
+                          validator: ValidationUtils.validatePassword,
                           onChanged: (value) {
                             setState(() {
                               _authData['password'] = value;
@@ -138,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: _isLoading
                               ? const ButtonLoadingIndicator()
                               : const Text(
-                                  "Sign in",
+                                  "Sign In",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
@@ -150,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              "Doesn't have account ?",
+                              "Doesn't have account ? ",
                               style: TextStyle(fontWeight: FontWeight.w500),
                             ),
                             InkWell(
@@ -159,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     context, "/signup");
                               },
                               child: const Text(
-                                "Sign up",
+                                "Sign Up",
                                 style: TextStyle(
                                   color: Colors.purple,
                                   fontSize: 16,
@@ -168,6 +163,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        mHeightSpan,
+                        InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, "/reset");
+                          },
+                          child: const Text(
+                            "Forget Password?",
+                            style: TextStyle(
+                              color: Colors.purple,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ],
                     ),

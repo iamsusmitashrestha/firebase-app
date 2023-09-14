@@ -124,4 +124,12 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -5,8 +5,9 @@ import 'package:firebase_app/common/widgets/button_loading_indicator.dart';
 import 'package:firebase_app/common/widgets/common_button.dart';
 import 'package:firebase_app/common/widgets/common_text_form_field.dart';
 import 'package:firebase_app/data/provider/auth_provider.dart';
-import 'package:firebase_app/services/validation_service.dart';
 import 'package:firebase_app/themes/app_themes.dart';
+import 'package:firebase_app/utils/snackbar_util.dart';
+import 'package:firebase_app/utils/validation_util.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       await Provider.of<AuthProvider>(context, listen: false)
           .updateUserData(_fullName, _email, _imageFile!);
+
+      SnackbarUtil.showSnackbar(context, "User details updated");
     } catch (e) {
       print("Error on updating user details $e");
     } finally {
@@ -59,6 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  // User logout
   Future<void> logout() async {
     try {
       _setLoading(true);
@@ -76,110 +80,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: Consumer<AuthProvider>(builder: (context, data, child) {
           final currentUser = data.currentUser!;
+          print(currentUser.imageUrl);
           return ListView(
             padding: lPadding,
             children: [
-              Card(
-                elevation: 4,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        const Text(
-                          "USER DETAILS",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w500,
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      const Spacer(),
+                      const Text(
+                        "Profile",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      InkWell(
+                          child: const Text(
+                            "Logout",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                              color: Colors.purple,
+                            ),
                           ),
+                          onTap: () async {
+                            await Provider.of<AuthProvider>(context,
+                                    listen: false)
+                                .logout();
+                            if (mounted) {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("/login");
+                            }
+                          }),
+                    ],
+                  ),
+                  lHeightSpan,
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundImage: (_imageFile != null)
+                            ? FileImage(File(_imageFile!.path))
+                                as ImageProvider<Object>?
+                            : (currentUser.imageUrl.isNotEmpty)
+                                ? NetworkImage(currentUser.imageUrl)
+                                : null,
+                      ),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: PRIMARY_COLOR,
                         ),
-                        mHeightSpan,
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundImage: (_imageFile != null)
-                                  ? FileImage(File(_imageFile!.path))
-                                      as ImageProvider<Object>?
-                                  : (currentUser.imageUrl.isNotEmpty)
-                                      ? NetworkImage(currentUser.imageUrl)
-                                      : null,
-                            ),
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: PRIMARY_COLOR,
-                              ),
-                              child: IconButton(
-                                onPressed: selectImage,
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  size: 20,
-                                ),
-                                color: Colors.white,
-                                autofocus: true,
-                              ),
-                            ),
-                          ],
+                        child: IconButton(
+                          onPressed: selectImage,
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            size: 20,
+                          ),
+                          color: Colors.white,
+                          autofocus: true,
                         ),
-                        mHeightSpan,
-                        CommonTextFormField(
-                          label: "Full name",
-                          initialValue: currentUser.fullName,
-                          validator: ValidatorService.validateFullName,
-                          onSaved: (value) {
-                            setState(() {
-                              _fullName = value ?? '';
-                            });
-                          },
-                        ),
-                        mHeightSpan,
-                        CommonTextFormField(
-                          label: "Email",
-                          initialValue: currentUser.email,
-                          validator: ValidatorService.validateEmail,
-                          onSaved: (value) {
-                            setState(() {
-                              _email = value ?? '';
-                            });
-                          },
-                        ),
-                        mHeightSpan,
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CommonButton(
-                                onPressed: updateUserData,
-                                child: _isLoading
-                                    ? const ButtonLoadingIndicator()
-                                    : const Text("Save"),
-                              ),
-                            ),
-                            elWidthSpan,
-                            Expanded(
-                              child: CommonButton(
-                                  child: _isLoading
-                                      ? const ButtonLoadingIndicator()
-                                      : const Text("Logout"),
-                                  onPressed: () async {
-                                    await Provider.of<AuthProvider>(context,
-                                            listen: false)
-                                        .logout();
-                                    if (mounted) {
-                                      Navigator.of(context)
-                                          .pushReplacementNamed("/login");
-                                    }
-                                  }),
-                            ),
-                          ],
+                      ),
+                    ],
+                  ),
+                  sHeightSpan,
+                  Text(
+                    currentUser.fullName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              lHeightSpan,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    CommonTextFormField(
+                      label: "Full name",
+                      initialValue: currentUser.fullName,
+                      validator: ValidationUtils.validateFullName,
+                      onSaved: (value) {
+                        setState(() {
+                          _fullName = value ?? '';
+                        });
+                      },
+                    ),
+                    mHeightSpan,
+                    CommonTextFormField(
+                      label: "Email",
+                      initialValue: currentUser.email,
+                      validator: ValidationUtils.validateEmail,
+                      onSaved: (value) {
+                        setState(() {
+                          _email = value ?? '';
+                        });
+                      },
+                    ),
+                    mHeightSpan,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CommonButton(
+                            onPressed: updateUserData,
+                            child: _isLoading
+                                ? const ButtonLoadingIndicator()
+                                : const Text(
+                                    "Save",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                          ),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],

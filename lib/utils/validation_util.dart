@@ -1,4 +1,4 @@
-class ValidatorService {
+class ValidationUtils {
   static String? validateFullName(String? fullName) {
     RegExp regex = RegExp(r"^[A-Z][a-z]*\s[A-Z][a-z]*$");
 

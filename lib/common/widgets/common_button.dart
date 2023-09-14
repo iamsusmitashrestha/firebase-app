@@ -6,12 +6,10 @@ import '../constants/ui_helpers.dart';
 class CommonButton extends StatelessWidget {
   final Widget child;
   final void Function() onPressed;
-  final bool isBusy;
   const CommonButton({
     super.key,
     required this.child,
     required this.onPressed,
-    this.isBusy = false,
   });
 
   @override
