@@ -80,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: Consumer<AuthProvider>(builder: (context, data, child) {
           final currentUser = data.currentUser!;
-          print(currentUser.imageUrl);
           return ListView(
             padding: lPadding,
             children: [
