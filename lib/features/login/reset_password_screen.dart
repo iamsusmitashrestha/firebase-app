@@ -31,6 +31,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (mounted) {
         SnackbarUtil.showSnackbar(
             context, "Password reset email has been sent");
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
